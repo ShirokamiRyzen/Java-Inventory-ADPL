@@ -65,8 +65,9 @@ public class PanelBarang extends JPanel {
             actionPanel.add(btnEdit);
             actionPanel.add(btnDelete);
         } else if ("Pemilik".equalsIgnoreCase(role)) {
-            // Pemilik can only edit prices, disable Add/Delete
+            // Pemilik can add new goods and adjust prices
             btnEdit.setText("Sesuaikan Harga");
+            actionPanel.add(btnAdd);
             actionPanel.add(btnEdit);
         } else {
             // Admin Gudang can only view/monitor

@@ -16,13 +16,16 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class PanelLaporan extends JPanel {
     private JComboBox<String> cbJenisLaporan;
+    private JSpinner spinTanggalMulai;
+    private JSpinner spinTanggalSelesai;
     private JTextArea txtPreview;
-    private JButton btnGenerate, btnSaveReport;
+    private JButton btnGenerate, btnSaveReport, btnPrint;
     private JTable tblHistory;
     private DefaultTableModel historyModel;
 
@@ -81,26 +84,67 @@ public class PanelLaporan extends JPanel {
         };
         ctrlCard.setOpaque(false);
         
-        JLabel lblSelect = new JLabel("Pilih Jenis Laporan:");
+        JLabel lblSelect = new JLabel("Laporan:");
         lblSelect.setFont(Theme.FONT_HEADER);
         lblSelect.setForeground(Theme.FG_LIGHT);
         ctrlCard.add(lblSelect);
 
-        String[] reportTypes = {"Laporan Stok Barang", "Laporan Barang Masuk", "Laporan Barang Keluar"};
+        String[] reportTypes = {"Stok Barang", "Barang Masuk", "Barang Keluar"};
         cbJenisLaporan = new JComboBox<>(reportTypes);
         cbJenisLaporan.setBackground(Theme.BG_DARK);
         cbJenisLaporan.setForeground(Theme.FG_LIGHT);
-        cbJenisLaporan.setPreferredSize(new Dimension(200, 35));
+        cbJenisLaporan.setPreferredSize(new Dimension(150, 35));
         ctrlCard.add(cbJenisLaporan);
 
-        btnGenerate = new JButton("Generate Preview");
+        // Date Period inputs
+        JLabel lblMulai = new JLabel("Mulai:");
+        lblMulai.setFont(Theme.FONT_HEADER);
+        lblMulai.setForeground(Theme.FG_LIGHT);
+        ctrlCard.add(lblMulai);
+
+        Calendar calStart = Calendar.getInstance();
+        calStart.set(Calendar.DAY_OF_MONTH, 1);
+        Date startDate = calStart.getTime();
+
+        spinTanggalMulai = new JSpinner(new SpinnerDateModel(startDate, null, null, Calendar.DAY_OF_MONTH));
+        JSpinner.DateEditor deStart = new JSpinner.DateEditor(spinTanggalMulai, "yyyy-MM-dd");
+        spinTanggalMulai.setEditor(deStart);
+        JFormattedTextField txtEditorStart = deStart.getTextField();
+        txtEditorStart.setBackground(Theme.BG_DARK);
+        txtEditorStart.setForeground(Theme.FG_LIGHT);
+        txtEditorStart.setCaretColor(Theme.FG_LIGHT);
+        spinTanggalMulai.setPreferredSize(new Dimension(110, 35));
+        ctrlCard.add(spinTanggalMulai);
+
+        JLabel lblSelesai = new JLabel("Selesai:");
+        lblSelesai.setFont(Theme.FONT_HEADER);
+        lblSelesai.setForeground(Theme.FG_LIGHT);
+        ctrlCard.add(lblSelesai);
+
+        Date endDate = new Date();
+        spinTanggalSelesai = new JSpinner(new SpinnerDateModel(endDate, null, null, Calendar.DAY_OF_MONTH));
+        JSpinner.DateEditor deSelesai = new JSpinner.DateEditor(spinTanggalSelesai, "yyyy-MM-dd");
+        spinTanggalSelesai.setEditor(deSelesai);
+        JFormattedTextField txtEditorSelesai = deSelesai.getTextField();
+        txtEditorSelesai.setBackground(Theme.BG_DARK);
+        txtEditorSelesai.setForeground(Theme.FG_LIGHT);
+        txtEditorSelesai.setCaretColor(Theme.FG_LIGHT);
+        spinTanggalSelesai.setPreferredSize(new Dimension(110, 35));
+        ctrlCard.add(spinTanggalSelesai);
+
+        btnGenerate = new JButton("Tampilkan");
         Theme.styleButton(btnGenerate, Theme.PRIMARY, Color.WHITE);
         ctrlCard.add(btnGenerate);
 
-        btnSaveReport = new JButton("Simpan Laporan (Log)");
+        btnSaveReport = new JButton("Simpan Log");
         Theme.styleButton(btnSaveReport, Theme.SUCCESS, Color.WHITE);
         btnSaveReport.setEnabled(false);
         ctrlCard.add(btnSaveReport);
+
+        btnPrint = new JButton("Cetak Laporan");
+        Theme.styleButton(btnPrint, Theme.PRIMARY, Color.WHITE);
+        btnPrint.setEnabled(false);
+        ctrlCard.add(btnPrint);
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 1.0; gbc.weighty = 0.05;
         mainPanel.add(ctrlCard, gbc);
@@ -166,6 +210,14 @@ public class PanelLaporan extends JPanel {
         // Listeners
         btnGenerate.addActionListener(e -> generateReport());
         btnSaveReport.addActionListener(e -> saveReportToLog());
+        btnPrint.addActionListener(e -> {
+            try {
+                // Print formatted JTextArea contents with standard headers
+                txtPreview.print(null, null, true, null, null, true);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Gagal mencetak laporan: " + ex.getMessage(), "Error Cetak", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
     private void loadHistory() {
@@ -198,11 +250,16 @@ public class PanelLaporan extends JPanel {
 
     private void generateReport() {
         int selectedType = cbJenisLaporan.getSelectedIndex();
+        SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String start = sdfFormat.format((Date) spinTanggalMulai.getValue());
+        String end = sdfFormat.format((Date) spinTanggalSelesai.getValue());
+        
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timestamp = sdf.format(new Date());
 
         txtPreview.setText("Mempersiapkan data laporan...");
         btnSaveReport.setEnabled(false);
+        btnPrint.setEnabled(false);
 
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
@@ -217,6 +274,7 @@ public class PanelLaporan extends JPanel {
                 
                 if (selectedType == 0) { // Stok Barang
                     sb.append("Tipe Laporan  : Laporan Stok Barang Aktual\n");
+                    sb.append("Periode       : Semua Data Terkini\n");
                     sb.append("====================================================\n\n");
                     sb.append(String.format("%-10s %-22s %-12s %-6s\n", "KODE", "NAMA BARANG", "KATEGORI", "STOK"));
                     sb.append("----------------------------------------------------\n");
@@ -239,11 +297,17 @@ public class PanelLaporan extends JPanel {
                     
                 } else if (selectedType == 1) { // Barang Masuk
                     sb.append("Tipe Laporan  : Transaksi Barang Masuk (Restock)\n");
+                    sb.append("Periode       : ").append(start).append(" s/d ").append(end).append("\n");
                     sb.append("====================================================\n\n");
                     sb.append(String.format("%-8s %-10s %-20s %-5s %-10s\n", "ID", "TANGGAL", "BARANG", "QTY", "SUPPLIER"));
                     sb.append("----------------------------------------------------\n");
                     
                     List<BarangMasuk> items = masukDAO.getAllBarangMasuk();
+                    // Filter list by date range period
+                    items = items.stream()
+                        .filter(bm -> bm.getTanggalMasuk().compareTo(start) >= 0 && bm.getTanggalMasuk().compareTo(end) <= 0)
+                        .collect(java.util.stream.Collectors.toList());
+                        
                     int totalMasuk = 0;
                     for (BarangMasuk bm : items) {
                         String name = bm.getNamaBarang();
@@ -262,11 +326,17 @@ public class PanelLaporan extends JPanel {
                     
                 } else { // Barang Keluar
                     sb.append("Tipe Laporan  : Transaksi Barang Keluar (Distribusi)\n");
+                    sb.append("Periode       : ").append(start).append(" s/d ").append(end).append("\n");
                     sb.append("====================================================\n\n");
                     sb.append(String.format("%-8s %-10s %-20s %-5s %-10s\n", "ID", "TANGGAL", "BARANG", "QTY", "PENERIMA"));
                     sb.append("----------------------------------------------------\n");
                     
                     List<BarangKeluar> items = keluarDAO.getAllBarangKeluar();
+                    // Filter list by date range period
+                    items = items.stream()
+                        .filter(bk -> bk.getTanggalKeluar().compareTo(start) >= 0 && bk.getTanggalKeluar().compareTo(end) <= 0)
+                        .collect(java.util.stream.Collectors.toList());
+
                     int totalKeluar = 0;
                     for (BarangKeluar bk : items) {
                         String name = bk.getNamaBarang();
@@ -296,6 +366,7 @@ public class PanelLaporan extends JPanel {
                     currentReportContent = get();
                     txtPreview.setText(currentReportContent);
                     btnSaveReport.setEnabled(true);
+                    btnPrint.setEnabled(true);
                 } catch (Exception e) {
                     txtPreview.setText("Gagal membuat laporan: " + e.getMessage());
                 }
