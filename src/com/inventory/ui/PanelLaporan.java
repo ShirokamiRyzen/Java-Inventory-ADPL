@@ -10,6 +10,7 @@ import com.inventory.model.BarangKeluar;
 import com.inventory.model.Laporan;
 import com.inventory.model.User;
 import com.inventory.ui.theme.Theme;
+import com.inventory.ui.components.DatePicker;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -22,10 +23,10 @@ import java.util.List;
 
 public class PanelLaporan extends JPanel {
     private JComboBox<String> cbJenisLaporan;
-    private JSpinner spinTanggalMulai;
-    private JSpinner spinTanggalSelesai;
+    private DatePicker dpTanggalMulai;
+    private DatePicker dpTanggalSelesai;
     private JTextArea txtPreview;
-    private JButton btnGenerate, btnSaveReport, btnPrint;
+    private JButton btnGenerate, btnSaveReport, btnPrint, btnExportExcel;
     private JTable tblHistory;
     private DefaultTableModel historyModel;
 
@@ -106,15 +107,8 @@ public class PanelLaporan extends JPanel {
         calStart.set(Calendar.DAY_OF_MONTH, 1);
         Date startDate = calStart.getTime();
 
-        spinTanggalMulai = new JSpinner(new SpinnerDateModel(startDate, null, null, Calendar.DAY_OF_MONTH));
-        JSpinner.DateEditor deStart = new JSpinner.DateEditor(spinTanggalMulai, "yyyy-MM-dd");
-        spinTanggalMulai.setEditor(deStart);
-        JFormattedTextField txtEditorStart = deStart.getTextField();
-        txtEditorStart.setBackground(Theme.BG_DARK);
-        txtEditorStart.setForeground(Theme.FG_LIGHT);
-        txtEditorStart.setCaretColor(Theme.FG_LIGHT);
-        spinTanggalMulai.setPreferredSize(new Dimension(110, 35));
-        ctrlCard.add(spinTanggalMulai);
+        dpTanggalMulai = new DatePicker(startDate);
+        ctrlCard.add(dpTanggalMulai);
 
         JLabel lblSelesai = new JLabel("Selesai:");
         lblSelesai.setFont(Theme.FONT_HEADER);
@@ -122,15 +116,8 @@ public class PanelLaporan extends JPanel {
         ctrlCard.add(lblSelesai);
 
         Date endDate = new Date();
-        spinTanggalSelesai = new JSpinner(new SpinnerDateModel(endDate, null, null, Calendar.DAY_OF_MONTH));
-        JSpinner.DateEditor deSelesai = new JSpinner.DateEditor(spinTanggalSelesai, "yyyy-MM-dd");
-        spinTanggalSelesai.setEditor(deSelesai);
-        JFormattedTextField txtEditorSelesai = deSelesai.getTextField();
-        txtEditorSelesai.setBackground(Theme.BG_DARK);
-        txtEditorSelesai.setForeground(Theme.FG_LIGHT);
-        txtEditorSelesai.setCaretColor(Theme.FG_LIGHT);
-        spinTanggalSelesai.setPreferredSize(new Dimension(110, 35));
-        ctrlCard.add(spinTanggalSelesai);
+        dpTanggalSelesai = new DatePicker(endDate);
+        ctrlCard.add(dpTanggalSelesai);
 
         btnGenerate = new JButton("Tampilkan");
         Theme.styleButton(btnGenerate, Theme.PRIMARY, Color.WHITE);
@@ -145,6 +132,15 @@ public class PanelLaporan extends JPanel {
         Theme.styleButton(btnPrint, Theme.PRIMARY, Color.WHITE);
         btnPrint.setEnabled(false);
         ctrlCard.add(btnPrint);
+
+        btnExportExcel = new JButton("Ekspor Excel");
+        Theme.styleButton(btnExportExcel, Theme.SUCCESS, Color.WHITE);
+        btnExportExcel.setEnabled(false);
+        ctrlCard.add(btnExportExcel);
+
+        // Keep date pickers always enabled for user flexibility
+        dpTanggalMulai.setEnabled(true);
+        dpTanggalSelesai.setEnabled(true);
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 1.0; gbc.weighty = 0.05;
         mainPanel.add(ctrlCard, gbc);
@@ -210,6 +206,7 @@ public class PanelLaporan extends JPanel {
         // Listeners
         btnGenerate.addActionListener(e -> generateReport());
         btnSaveReport.addActionListener(e -> saveReportToLog());
+        btnExportExcel.addActionListener(e -> exportToExcel());
         btnPrint.addActionListener(e -> {
             try {
                 // Print formatted JTextArea contents with standard headers
@@ -250,9 +247,27 @@ public class PanelLaporan extends JPanel {
 
     private void generateReport() {
         int selectedType = cbJenisLaporan.getSelectedIndex();
+        Date dateMulai = dpTanggalMulai.getSelectedDate();
+        Date dateSelesai = dpTanggalSelesai.getSelectedDate();
+
+        // Validasi periode tanggal untuk seluruh tipe laporan
+        if (dateMulai.after(dateSelesai)) {
+            JOptionPane.showMessageDialog(this, "Tanggal mulai tidak boleh melebihi tanggal selesai!", "Validasi Laporan Gagal", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Hitung selisih hari
+        long diffInMillis = dateSelesai.getTime() - dateMulai.getTime();
+        long diffInDays = diffInMillis / (1000 * 60 * 60 * 24);
+
+        if (diffInDays > 31) {
+            JOptionPane.showMessageDialog(this, "Rentang tanggal laporan bulanan tidak boleh melebihi 31 hari!", "Validasi Laporan Gagal", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String start = sdfFormat.format((Date) spinTanggalMulai.getValue());
-        String end = sdfFormat.format((Date) spinTanggalSelesai.getValue());
+        String start = sdfFormat.format(dateMulai);
+        String end = sdfFormat.format(dateSelesai);
         
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timestamp = sdf.format(new Date());
@@ -274,7 +289,7 @@ public class PanelLaporan extends JPanel {
                 
                 if (selectedType == 0) { // Stok Barang
                     sb.append("Tipe Laporan  : Laporan Stok Barang Aktual\n");
-                    sb.append("Periode       : Semua Data Terkini\n");
+                    sb.append("Periode       : ").append(start).append(" s/d ").append(end).append("\n");
                     sb.append("====================================================\n\n");
                     sb.append(String.format("%-10s %-22s %-12s %-6s\n", "KODE", "NAMA BARANG", "KATEGORI", "STOK"));
                     sb.append("----------------------------------------------------\n");
@@ -367,6 +382,7 @@ public class PanelLaporan extends JPanel {
                     txtPreview.setText(currentReportContent);
                     btnSaveReport.setEnabled(true);
                     btnPrint.setEnabled(true);
+                    btnExportExcel.setEnabled(true);
                 } catch (Exception e) {
                     txtPreview.setText("Gagal membuat laporan: " + e.getMessage());
                 }
@@ -399,6 +415,78 @@ public class PanelLaporan extends JPanel {
             loadHistory();
         } else {
             JOptionPane.showMessageDialog(this, "Gagal mengarsipkan laporan!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void exportToExcel() {
+        int selectedType = cbJenisLaporan.getSelectedIndex();
+        Date dateMulai = dpTanggalMulai.getSelectedDate();
+        Date dateSelesai = dpTanggalSelesai.getSelectedDate();
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
+        String start = sdfDate.format(dateMulai);
+        String end = sdfDate.format(dateSelesai);
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Simpan Laporan Excel (.csv)");
+        
+        String defaultName = "";
+        if (selectedType == 0) {
+            defaultName = "Laporan_Stok_Aktual.csv";
+        } else if (selectedType == 1) {
+            defaultName = "Laporan_Barang_Masuk_" + start + "_to_" + end + ".csv";
+        } else {
+            defaultName = "Laporan_Barang_Keluar_" + start + "_to_" + end + ".csv";
+        }
+        fileChooser.setSelectedFile(new java.io.File(defaultName));
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.toLowerCase().endsWith(".csv")) {
+                filePath += ".csv";
+                fileToSave = new java.io.File(filePath);
+            }
+
+            try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.OutputStreamWriter(
+                    new java.io.FileOutputStream(fileToSave), java.nio.charset.StandardCharsets.UTF_8))) {
+                
+                // Write UTF-8 BOM for Excel compatibility
+                pw.write('\ufeff');
+
+                if (selectedType == 0) {
+                    pw.println("KODE BARANG;NAMA BARANG;KATEGORI;STOK;HARGA;NILAI ASET");
+                    List<Barang> items = barangDAO.getAllBarang();
+                    for (Barang b : items) {
+                        pw.println(String.format("%s;%s;%s;%d;%.2f;%.2f",
+                            b.getIdBarang(), b.getNamaBarang(), b.getKategori(), b.getStok(), b.getHarga(), (b.getHarga() * b.getStok())));
+                    }
+                } else if (selectedType == 1) {
+                    pw.println("ID MASUK;TANGGAL MASUK;KODE BARANG;NAMA BARANG;JUMLAH MASUK;SUPPLIER");
+                    List<BarangMasuk> items = masukDAO.getAllBarangMasuk();
+                    items = items.stream()
+                        .filter(bm -> bm.getTanggalMasuk().compareTo(start) >= 0 && bm.getTanggalMasuk().compareTo(end) <= 0)
+                        .collect(java.util.stream.Collectors.toList());
+                    for (BarangMasuk bm : items) {
+                        pw.println(String.format("%s;%s;%s;%s;%d;%s",
+                            bm.getIdBarangMasuk(), bm.getTanggalMasuk(), bm.getIdBarang(), bm.getNamaBarang(), bm.getJumlahMasuk(), bm.getSupplier()));
+                    }
+                } else {
+                    pw.println("ID KELUAR;TANGGAL KELUAR;KODE BARANG;NAMA BARANG;JUMLAH KELUAR;PENERIMA");
+                    List<BarangKeluar> items = keluarDAO.getAllBarangKeluar();
+                    items = items.stream()
+                        .filter(bk -> bk.getTanggalKeluar().compareTo(start) >= 0 && bk.getTanggalKeluar().compareTo(end) <= 0)
+                        .collect(java.util.stream.Collectors.toList());
+                    for (BarangKeluar bk : items) {
+                        pw.println(String.format("%s;%s;%s;%s;%d;%s",
+                            bk.getIdBarangKeluar(), bk.getTanggalKeluar(), bk.getIdBarang(), bk.getNamaBarang(), bk.getJumlahKeluar(), bk.getPenerima()));
+                    }
+                }
+                
+                JOptionPane.showMessageDialog(this, "Laporan berhasil diekspor ke Excel (.csv)!", "Sukses Ekspor", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Gagal mengekspor laporan: " + ex.getMessage(), "Error Ekspor", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

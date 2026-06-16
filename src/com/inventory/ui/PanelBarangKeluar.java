@@ -6,6 +6,7 @@ import com.inventory.model.Barang;
 import com.inventory.model.BarangKeluar;
 import com.inventory.model.User;
 import com.inventory.ui.theme.Theme;
+import com.inventory.ui.components.DatePicker;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -126,7 +127,7 @@ public class PanelBarangKeluar extends JPanel {
         }
 
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Input Barang Keluar Baru", true);
-        dialog.setSize(400, 360);
+        dialog.setSize(450, 360); // slightly wider to avoid any label cutoffs
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
 
@@ -136,7 +137,6 @@ public class PanelBarangKeluar extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.weightx = 1.0;
 
         // Fields
         JLabel lblId = new JLabel("ID Barang Keluar");
@@ -146,13 +146,9 @@ public class PanelBarangKeluar extends JPanel {
         txtId.setForeground(Theme.FG_LIGHT);
         txtId.setEnabled(false);
 
-        JLabel lblTanggal = new JLabel("Tanggal Keluar (YYYY-MM-DD)");
+        JLabel lblTanggal = new JLabel("Tanggal Keluar");
         lblTanggal.setForeground(Theme.FG_LIGHT);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        JTextField txtTanggal = new JTextField(sdf.format(new Date()));
-        txtTanggal.setBackground(Theme.BG_DARK);
-        txtTanggal.setForeground(Theme.FG_LIGHT);
-        txtTanggal.setCaretColor(Theme.FG_LIGHT);
+        DatePicker dpTanggal = new DatePicker(new Date());
 
         JLabel lblBarang = new JLabel("Pilih Barang");
         lblBarang.setForeground(Theme.FG_LIGHT);
@@ -178,20 +174,30 @@ public class PanelBarangKeluar extends JPanel {
         txtPenerima.setForeground(Theme.FG_LIGHT);
         txtPenerima.setCaretColor(Theme.FG_LIGHT);
 
-        // Layout adding
+        // Layout adding (explicit column weights so labels don't get truncated)
+        gbc.weightx = 0.0;
         gbc.gridx = 0; gbc.gridy = 0; content.add(lblId, gbc);
+        gbc.weightx = 1.0;
         gbc.gridx = 1; content.add(txtId, gbc);
 
+        gbc.weightx = 0.0;
         gbc.gridx = 0; gbc.gridy = 1; content.add(lblTanggal, gbc);
-        gbc.gridx = 1; content.add(txtTanggal, gbc);
+        gbc.weightx = 1.0;
+        gbc.gridx = 1; content.add(dpTanggal, gbc);
 
+        gbc.weightx = 0.0;
         gbc.gridx = 0; gbc.gridy = 2; content.add(lblBarang, gbc);
+        gbc.weightx = 1.0;
         gbc.gridx = 1; content.add(cbBarang, gbc);
 
+        gbc.weightx = 0.0;
         gbc.gridx = 0; gbc.gridy = 3; content.add(lblJumlah, gbc);
+        gbc.weightx = 1.0;
         gbc.gridx = 1; content.add(txtJumlah, gbc);
 
+        gbc.weightx = 0.0;
         gbc.gridx = 0; gbc.gridy = 4; content.add(lblPenerima, gbc);
+        gbc.weightx = 1.0;
         gbc.gridx = 1; content.add(txtPenerima, gbc);
 
         // Buttons
@@ -211,7 +217,8 @@ public class PanelBarangKeluar extends JPanel {
         btnCancel.addActionListener(e -> dialog.dispose());
         btnSave.addActionListener(e -> {
             String idKeluar = txtId.getText();
-            String tanggal = txtTanggal.getText().trim();
+            SimpleDateFormat sdfFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String tanggal = sdfFormat.format(dpTanggal.getSelectedDate());
             int selectedIdx = cbBarang.getSelectedIndex();
             String jumlahStr = txtJumlah.getText().trim();
             String penerima = txtPenerima.getText().trim();

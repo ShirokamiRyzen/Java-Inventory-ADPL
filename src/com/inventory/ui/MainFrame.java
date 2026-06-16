@@ -55,8 +55,8 @@ public class MainFrame extends JFrame {
         JPanel sbHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 20));
         sbHeader.setOpaque(false);
         
-        JLabel lblLogo = new JLabel("⚡"); // Decorative modern icon
-        lblLogo.setFont(new Font("Segoe UI", Font.PLAIN, 28));
+        JLabel lblLogo = new JLabel(new MenuIcon("logo", 24, 24));
+        lblLogo.setPreferredSize(new Dimension(24, 24));
         lblLogo.setForeground(Theme.PRIMARY);
         sbHeader.add(lblLogo);
 
@@ -282,11 +282,17 @@ public class MainFrame extends JFrame {
     // --- Custom Vector Icon Class drawing clean icons using Java2D ---
     private static class MenuIcon implements Icon {
         private String type;
-        private final int width = 16;
-        private final int height = 16;
+        private int width = 16;
+        private int height = 16;
 
         public MenuIcon(String type) {
             this.type = type;
+        }
+
+        public MenuIcon(String type, int width, int height) {
+            this.type = type;
+            this.width = width;
+            this.height = height;
         }
 
         @Override
@@ -298,7 +304,34 @@ public class MainFrame extends JFrame {
             g2.setColor(c.getForeground());
             g2.setStroke(new BasicStroke(1.8f));
 
-            if ("dashboard".equals(type)) {
+            if ("logo".equals(type)) {
+                // Draw a beautiful geometric stylized 3D cube (box)
+                g2.setStroke(new BasicStroke(2.0f));
+                g2.setColor(Theme.PRIMARY);
+                int w = width;
+                int h = height;
+                int midX = x + w / 2;
+                int topY = y + 2;
+                int bottomY = y + h - 2;
+                int midY = y + h / 2;
+                int leftX = x + 2;
+                int rightX = x + w - 2;
+                
+                // Top edges
+                g2.drawLine(midX, topY, rightX, topY + h / 4);
+                g2.drawLine(midX, topY, leftX, topY + h / 4);
+                g2.drawLine(leftX, topY + h / 4, midX, midY);
+                g2.drawLine(rightX, topY + h / 4, midX, midY);
+                
+                // Vertical pillars
+                g2.drawLine(leftX, topY + h / 4, leftX, bottomY - h / 4);
+                g2.drawLine(rightX, topY + h / 4, rightX, bottomY - h / 4);
+                g2.drawLine(midX, midY, midX, bottomY);
+                
+                // Bottom edges
+                g2.drawLine(leftX, bottomY - h / 4, midX, bottomY);
+                g2.drawLine(rightX, bottomY - h / 4, midX, bottomY);
+            } else if ("dashboard".equals(type)) {
                 // Draw a 3-bar chart
                 g2.fillRect(x + 1, y + 10, 3, 5);
                 g2.fillRect(x + 6, y + 4, 3, 11);
