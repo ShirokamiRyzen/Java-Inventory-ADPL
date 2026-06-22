@@ -26,7 +26,7 @@ public class PanelLaporan extends JPanel {
     private DatePicker dpTanggalMulai;
     private DatePicker dpTanggalSelesai;
     private JTextArea txtPreview;
-    private JButton btnGenerate, btnSaveReport, btnPrint, btnExportExcel;
+    private JButton btnGenerate, btnSaveReport, btnExportExcel;
     private JTable tblHistory;
     private DefaultTableModel historyModel;
 
@@ -128,10 +128,7 @@ public class PanelLaporan extends JPanel {
         btnSaveReport.setEnabled(false);
         ctrlCard.add(btnSaveReport);
 
-        btnPrint = new JButton("Cetak Laporan");
-        Theme.styleButton(btnPrint, Theme.PRIMARY, Color.WHITE);
-        btnPrint.setEnabled(false);
-        ctrlCard.add(btnPrint);
+
 
         btnExportExcel = new JButton("Ekspor Excel");
         Theme.styleButton(btnExportExcel, Theme.SUCCESS, Color.WHITE);
@@ -207,14 +204,6 @@ public class PanelLaporan extends JPanel {
         btnGenerate.addActionListener(e -> generateReport());
         btnSaveReport.addActionListener(e -> saveReportToLog());
         btnExportExcel.addActionListener(e -> exportToExcel());
-        btnPrint.addActionListener(e -> {
-            try {
-                // Print formatted JTextArea contents with standard headers
-                txtPreview.print(null, null, true, null, null, true);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Gagal mencetak laporan: " + ex.getMessage(), "Error Cetak", JOptionPane.ERROR_MESSAGE);
-            }
-        });
     }
 
     private void loadHistory() {
@@ -274,7 +263,6 @@ public class PanelLaporan extends JPanel {
 
         txtPreview.setText("Mempersiapkan data laporan...");
         btnSaveReport.setEnabled(false);
-        btnPrint.setEnabled(false);
 
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
@@ -381,7 +369,6 @@ public class PanelLaporan extends JPanel {
                     currentReportContent = get();
                     txtPreview.setText(currentReportContent);
                     btnSaveReport.setEnabled(true);
-                    btnPrint.setEnabled(true);
                     btnExportExcel.setEnabled(true);
                 } catch (Exception e) {
                     txtPreview.setText("Gagal membuat laporan: " + e.getMessage());
