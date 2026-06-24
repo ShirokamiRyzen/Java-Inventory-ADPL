@@ -54,28 +54,24 @@ public class DatabaseCli {
     }
 
     private static void resetDatabase() {
-        File dbFile = new File("inventory.db");
-        if (dbFile.exists()) {
-            if (dbFile.delete()) {
-                System.out.println("Deleted existing inventory.db file.");
-            } else {
-                System.err.println("Could not delete inventory.db. Make sure no other process has locked the file.");
-            }
-        } else {
-            System.out.println("No existing inventory.db file to delete.");
+        try {
+            DatabaseHelper.resetDatabaseSchema();
+            System.out.println("Reset database schema successfully.");
+        } catch (SQLException e) {
+            System.err.println("Failed to reset database: " + e.getMessage());
         }
     }
 
     private static void clearDatabase() {
         try (Connection conn = DatabaseHelper.getConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.execute("PRAGMA foreign_keys = OFF;");
+            stmt.execute("SET FOREIGN_KEY_CHECKS = 0;");
             stmt.execute("DELETE FROM barang;");
             stmt.execute("DELETE FROM barang_masuk;");
             stmt.execute("DELETE FROM barang_keluar;");
             stmt.execute("DELETE FROM pengajuan_pembelian;");
             stmt.execute("DELETE FROM laporan;");
-            stmt.execute("PRAGMA foreign_keys = ON;");
+            stmt.execute("SET FOREIGN_KEY_CHECKS = 1;");
             System.out.println("All transaction and product records cleared successfully (user accounts retained).");
         } catch (SQLException e) {
             System.err.println("Failed to clear database: " + e.getMessage());

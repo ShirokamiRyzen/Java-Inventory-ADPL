@@ -16,7 +16,7 @@ public class DatabaseSeeder {
         try (Connection conn = DatabaseHelper.getConnection()) {
             // Disable foreign key constraints temporarily to clear data cleanly
             try (Statement stmt = conn.createStatement()) {
-                stmt.execute("PRAGMA foreign_keys = OFF;");
+                stmt.execute("SET FOREIGN_KEY_CHECKS = 0;");
                 
                 // Clear existing records except users (we keep testing accounts)
                 stmt.execute("DELETE FROM barang;");
@@ -25,7 +25,7 @@ public class DatabaseSeeder {
                 stmt.execute("DELETE FROM pengajuan_pembelian;");
                 stmt.execute("DELETE FROM laporan;");
                 
-                stmt.execute("PRAGMA foreign_keys = ON;");
+                stmt.execute("SET FOREIGN_KEY_CHECKS = 1;");
             }
 
             System.out.println("Existing transaction and product data cleared.");

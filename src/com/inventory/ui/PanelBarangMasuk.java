@@ -262,4 +262,10 @@ public class PanelBarangMasuk extends JPanel {
         dialog.setContentPane(content);
         dialog.setVisible(true);
     }
+
+    public void clearTableSelection() {
+        if (table != null) {
+            table.clearSelection();
+        }
+    }
 }

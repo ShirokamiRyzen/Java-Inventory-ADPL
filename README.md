@@ -1,6 +1,6 @@
 # 📦 Aplikasi Manajemen Inventaris Gudang
 
-Aplikasi manajemen inventaris barang gudang desktop berbasis **Java** dengan antarmuka grafis (**GUI**) modern menggunakan **javax.swing** dan **FlatLaf Look & Feel**. Data disimpan dalam database lokal **SQLite** untuk portabilitas tinggi tanpa memerlukan instalasi server database eksternal.
+Aplikasi manajemen inventaris barang gudang desktop berbasis **Java** dengan antarmuka grafis (**GUI**) modern menggunakan **javax.swing** dan **FlatLaf Look & Feel**. Data disimpan dalam database **MariaDB** yang dapat dikonfigurasi secara fleksibel (mendukung koneksi server lokal maupun cloud) melalui berkas konfigurasi `db.properties`.
 
 Aplikasi ini diimplementasikan berdasarkan diagram spesifikasi sistem yang diberikan (ERD, Use Case, Activity Diagram, dan Context Diagram) untuk mendukung 3 peran pengguna: **Admin Sistem**, **Admin Gudang**, dan **Pemilik**.
 
@@ -24,8 +24,8 @@ Setelah database diinisialisasi otomatis pada peluncuran pertama, Anda dapat mas
 ## 🛠️ Persyaratan Sistem & Dependensi
 Aplikasi ini berjalan mandiri tanpa Maven/Gradle di environment target dengan menyertakan JAR berikut di direktori `lib/` (diunduh otomatis):
 - **FlatLaf (v3.5.1)**: Look & feel modern bergaya IntelliJ Dark Mode (Slate/Indigo).
-- **SQLite JDBC Driver (v3.45.2.0)**: Driver konektor database relasional lokal.
-- **SLF4J API & Simple (v2.0.12)**: Penyedia logging dependensi SQLite.
+- **MariaDB Java Client (v3.5.1)**: Driver konektor database relasional MariaDB.
+- **SLF4J API & Simple (v2.0.12)**: Library API logging standar.
 
 ---
 
@@ -64,10 +64,10 @@ powershell -ExecutionPolicy Bypass -File seed.ps1
 ## 📐 Fitur Utama & Kesesuaian Diagram
 
 ### 1. Struktur Database Relasional (Kesesuaian ERD)
-Skema SQLite (`inventory.db`) diimplementasikan di [DatabaseHelper.java](file:///e:/Codes/Github/5--JAVA/Java-Inventory/src/com/inventory/database/DatabaseHelper.java) mencakup tabel-tabel berikut. Secara default, database diisi secara bersih (**hanya akun pengguna**) tanpa barang tiruan agar data tetap segar (fresh):
+Skema MariaDB diimplementasikan di [DatabaseHelper.java](file:///e:/Codes/Github/5--JAVA/Java-Inventory/src/com/inventory/database/DatabaseHelper.java) mencakup tabel-tabel berikut. Secara default, database diisi secara bersih (**hanya akun pengguna**) tanpa barang tiruan agar data tetap segar (fresh):
 - **`users`**: Menyimpan kredensial login, nama lengkap, dan peran akses.
 - **`barang`**: Data master barang (Kode, Nama, Kategori, Harga, Stok).
-- **`barang_masuk`**: Pencatatan unit masuk (Supplier, Tanggal, Jumlah) dengan relasi JNI/Foreign Key ke barang.
+- **`barang_masuk`**: Pencatatan unit masuk (Supplier, Tanggal, Jumlah) dengan relasi Foreign Key ke barang.
 - **`barang_keluar`**: Pencatatan unit keluar (Penerima, Tanggal, Jumlah) untuk melacak penyerahan barang keluar.
 - **`pengajuan_pembelian`**: Pengajuan restock dengan kolom status (`Pending`, `Disetujui`, `Ditolak`).
 - **`laporan`**: Audit log untuk pencetakan laporan.
@@ -97,7 +97,7 @@ Java-Inventory/
 ├── src/                      # Source code aplikasi Java
 │   └── com/inventory/
 │       ├── main/             # Entry point (Main.java)
-│       ├── database/         # SQLite helper & Database init
+│       ├── database/         # Database helper & Database init
 │       ├── model/            # Entitas POJO data model
 │       ├── dao/              # Data Access Objects (SQL query CRUD)
 │       └── ui/               # JFrame & JPanels antarmuka aplikasi

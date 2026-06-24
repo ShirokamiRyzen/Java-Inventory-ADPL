@@ -364,5 +364,14 @@ public class PanelBarang extends JPanel {
 
         dialog.setContentPane(content);
         dialog.setVisible(true);
+     }
+
+    public void clearTableSelection() {
+        if (table != null) {
+            table.clearSelection();
+        }
+        if (txtSearch != null) {
+            txtSearch.setText("");
+        }
     }
 }

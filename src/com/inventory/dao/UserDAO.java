@@ -15,7 +15,7 @@ public class UserDAO {
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
+            pstmt.setString(2, DatabaseHelper.hashPassword(password));
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -62,7 +62,7 @@ public class UserDAO {
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             
             pstmt.setString(1, user.getUsername());
-            pstmt.setString(2, user.getPassword());
+            pstmt.setString(2, DatabaseHelper.hashPassword(user.getPassword()));
             pstmt.setString(3, user.getRole());
             pstmt.setString(4, user.getNamaUser());
             
@@ -74,15 +74,26 @@ public class UserDAO {
     }
 
     public boolean updateUser(User user) {
-        String query = "UPDATE users SET username = ?, password = ?, role = ?, nama_user = ? WHERE id_user = ?";
+        boolean updatePassword = user.getPassword() != null && !user.getPassword().trim().isEmpty();
+        String query = updatePassword 
+            ? "UPDATE users SET username = ?, password = ?, role = ?, nama_user = ? WHERE id_user = ?"
+            : "UPDATE users SET username = ?, role = ?, nama_user = ? WHERE id_user = ?";
+            
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             
-            pstmt.setString(1, user.getUsername());
-            pstmt.setString(2, user.getPassword());
-            pstmt.setString(3, user.getRole());
-            pstmt.setString(4, user.getNamaUser());
-            pstmt.setInt(5, user.getIdUser());
+            if (updatePassword) {
+                pstmt.setString(1, user.getUsername());
+                pstmt.setString(2, DatabaseHelper.hashPassword(user.getPassword()));
+                pstmt.setString(3, user.getRole());
+                pstmt.setString(4, user.getNamaUser());
+                pstmt.setInt(5, user.getIdUser());
+            } else {
+                pstmt.setString(1, user.getUsername());
+                pstmt.setString(2, user.getRole());
+                pstmt.setString(3, user.getNamaUser());
+                pstmt.setInt(4, user.getIdUser());
+            }
             
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {

@@ -63,7 +63,7 @@ public class PanelUser extends JPanel {
         centerPanel.setOpaque(false);
         centerPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        String[] columns = {"ID User", "Username", "Password (Plain)", "Role", "Nama Lengkap"};
+        String[] columns = {"ID User", "Username", "Role", "Nama Lengkap"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -149,7 +149,6 @@ public class PanelUser extends JPanel {
                         tableModel.addRow(new Object[]{
                             u.getIdUser(),
                             u.getUsername(),
-                            u.getPassword(),
                             u.getRole(),
                             u.getNamaUser()
                         });
@@ -189,11 +188,11 @@ public class PanelUser extends JPanel {
 
         JLabel lblPass = new JLabel("Password");
         lblPass.setForeground(Theme.FG_LIGHT);
-        JTextField txtPass = new JTextField();
+        JPasswordField txtPass = new JPasswordField();
         txtPass.setBackground(Theme.BG_DARK);
         txtPass.setForeground(Theme.FG_LIGHT);
         txtPass.setCaretColor(Theme.FG_LIGHT);
-        if (isEdit) txtPass.setText(user.getPassword());
+        // Leave password field empty (blank) on edit
 
         JLabel lblRole = new JLabel("Role / Otoritas");
         lblRole.setForeground(Theme.FG_LIGHT);
@@ -241,12 +240,12 @@ public class PanelUser extends JPanel {
         btnCancel.addActionListener(e -> dialog.dispose());
         btnSave.addActionListener(e -> {
             String username = txtUser.getText().trim();
-            String password = txtPass.getText().trim();
+            String password = new String(txtPass.getPassword()).trim();
             String role = (String) cbRole.getSelectedItem();
             String nama = txtNama.getText().trim();
 
-            if (username.isEmpty() || password.isEmpty() || nama.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Semua field wajib diisi!", "Validasi Gagal", JOptionPane.ERROR_MESSAGE);
+            if (username.isEmpty() || nama.isEmpty() || (!isEdit && password.isEmpty())) {
+                JOptionPane.showMessageDialog(dialog, "Username, Nama Lengkap" + (!isEdit ? ", dan Password" : "") + " wajib diisi!", "Validasi Gagal", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -275,5 +274,11 @@ public class PanelUser extends JPanel {
 
         dialog.setContentPane(content);
         dialog.setVisible(true);
+    }
+
+    public void clearTableSelection() {
+        if (table != null) {
+            table.clearSelection();
+        }
     }
 }

@@ -10,7 +10,7 @@ New-Item -ItemType Directory -Force -Path "src/com/inventory/ui/theme"
 
 # URLs for required libraries
 $flatlafUrl = "https://repo1.maven.org/maven2/com/formdev/flatlaf/3.5.1/flatlaf-3.5.1.jar"
-$sqliteUrl = "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.45.2.0/sqlite-jdbc-3.45.2.0.jar"
+$mariadbUrl = "https://repo1.maven.org/maven2/org/mariadb/jdbc/mariadb-java-client/3.5.1/mariadb-java-client-3.5.1.jar"
 $slf4jApiUrl = "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.12/slf4j-api-2.0.12.jar"
 $slf4jSimpleUrl = "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/2.0.12/slf4j-simple-2.0.12.jar"
 
@@ -25,7 +25,10 @@ function Download-File ($url, $dest) {
 }
 
 Download-File $flatlafUrl "lib/flatlaf-3.5.1.jar"
-Download-File $sqliteUrl "lib/sqlite-jdbc-3.45.2.0.jar"
+if (Test-Path "lib/sqlite-jdbc-3.45.2.0.jar") {
+    Remove-Item -Path "lib/sqlite-jdbc-3.45.2.0.jar" -Force
+}
+Download-File $mariadbUrl "lib/mariadb-java-client-3.5.1.jar"
 Download-File $slf4jApiUrl "lib/slf4j-api-2.0.12.jar"
 Download-File $slf4jSimpleUrl "lib/slf4j-simple-2.0.12.jar"
 

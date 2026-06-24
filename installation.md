@@ -18,7 +18,7 @@ Sebelum memulai, pastikan perangkat Anda telah terpasang perangkat lunak berikut
 ## 🛠️ Langkah-Langkah Instalasi & Setup
 
 ### Langkah 1: Unduh Dependensi dan Siapkan Direktori
-Buka PowerShell di direktori utama proyek (`Java-Inventory`), kemudian jalankan perintah berikut untuk mengunduh pustaka visual (`FlatLaf`), driver database (`SQLite JDBC`), dan logger (`SLF4J`):
+Buka PowerShell di direktori utama proyek (`Java-Inventory`), kemudian jalankan perintah berikut untuk mengunduh pustaka visual (`FlatLaf`), driver database (`MariaDB Java Connector`), dan logger (`SLF4J`):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File setup.ps1
@@ -28,8 +28,10 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 
 ---
 
-### Langkah 2: Inisialisasi Database (Migrasi)
-Gunakan utilitas CLI database untuk membuat tabel-tabel relational yang dibutuhkan oleh aplikasi di dalam file database SQLite (`inventory.db`):
+### Langkah 2: Konfigurasi & Inisialisasi Database (Migrasi)
+1. Buka berkas **[db.properties](file:///e:/Codes/Github/5--JAVA/Java-Inventory/db.properties)** di direktori utama proyek.
+2. Sesuaikan konfigurasi host, port, nama database, username, dan password sesuai dengan server MariaDB Anda (baik lokal maupun di server cloud).
+3. Jalankan perintah migrasi berikut untuk membuat database (jika belum ada) beserta seluruh tabel yang dibutuhkan:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File db.ps1 migrate

@@ -315,4 +315,10 @@ public class PanelPengajuan extends JPanel {
             JOptionPane.showMessageDialog(this, "Pilih baris pengajuan yang ingin diproses!", "Peringatan", JOptionPane.WARNING_MESSAGE);
         }
     }
+
+    public void clearTableSelection() {
+        if (table != null) {
+            table.clearSelection();
+        }
+    }
 }

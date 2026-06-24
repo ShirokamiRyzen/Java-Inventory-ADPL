@@ -252,6 +252,21 @@ public class MainFrame extends JFrame {
         if (targetPanel instanceof PanelDashboard) {
             ((PanelDashboard) targetPanel).refreshData();
         }
+
+        // Clear table selections when switching pages to prevent stale selection states
+        if (targetPanel instanceof PanelBarang) {
+            ((PanelBarang) targetPanel).clearTableSelection();
+        } else if (targetPanel instanceof PanelBarangMasuk) {
+            ((PanelBarangMasuk) targetPanel).clearTableSelection();
+        } else if (targetPanel instanceof PanelBarangKeluar) {
+            ((PanelBarangKeluar) targetPanel).clearTableSelection();
+        } else if (targetPanel instanceof PanelPengajuan) {
+            ((PanelPengajuan) targetPanel).clearTableSelection();
+        } else if (targetPanel instanceof PanelUser) {
+            ((PanelUser) targetPanel).clearTableSelection();
+        } else if (targetPanel instanceof PanelLaporan) {
+            ((PanelLaporan) targetPanel).clearTableSelection();
+        }
     }
 
     public void refreshDashboardData() {

@@ -476,4 +476,10 @@ public class PanelLaporan extends JPanel {
             }
         }
     }
+
+    public void clearTableSelection() {
+        if (tblHistory != null) {
+            tblHistory.clearSelection();
+        }
+    }
 }
