@@ -4,3 +4,6 @@
 window.properties
 db.properties
 Java-Inventory.jar
+/build_staging/
+sources.txt
+manifest.txt
