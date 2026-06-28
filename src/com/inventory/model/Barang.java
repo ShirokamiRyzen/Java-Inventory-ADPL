@@ -3,16 +3,18 @@ package com.inventory.model;
 public class Barang {
     private String idBarang;
     private String namaBarang;
-    private double harga;
+    private double hargaBeli;
+    private double hargaJual;
     private String kategori;
     private int stok;
 
     public Barang() {}
 
-    public Barang(String idBarang, String namaBarang, double harga, String kategori, int stok) {
+    public Barang(String idBarang, String namaBarang, double hargaBeli, double hargaJual, String kategori, int stok) {
         this.idBarang = idBarang;
         this.namaBarang = namaBarang;
-        this.harga = harga;
+        this.hargaBeli = hargaBeli;
+        this.hargaJual = hargaJual;
         this.kategori = kategori;
         this.stok = stok;
     }
@@ -33,12 +35,20 @@ public class Barang {
         this.namaBarang = namaBarang;
     }
 
-    public double getHarga() {
-        return harga;
+    public double getHargaBeli() {
+        return hargaBeli;
     }
 
-    public void setHarga(double harga) {
-        this.harga = harga;
+    public void setHargaBeli(double hargaBeli) {
+        this.hargaBeli = hargaBeli;
+    }
+
+    public double getHargaJual() {
+        return hargaJual;
+    }
+
+    public void setHargaJual(double hargaJual) {
+        this.hargaJual = hargaJual;
     }
 
     public String getKategori() {
@@ -55,5 +65,10 @@ public class Barang {
 
     public void setStok(int stok) {
         this.stok = stok;
+    }
+
+    // For backwards compatibility
+    public double getHarga() {
+        return hargaJual;
     }
 }

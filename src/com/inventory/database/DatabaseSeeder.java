@@ -19,6 +19,7 @@ public class DatabaseSeeder {
                 stmt.execute("SET FOREIGN_KEY_CHECKS = 0;");
                 
                 // Clear existing records except users (we keep testing accounts)
+                stmt.execute("DELETE FROM supplier;");
                 stmt.execute("DELETE FROM barang;");
                 stmt.execute("DELETE FROM barang_masuk;");
                 stmt.execute("DELETE FROM barang_keluar;");
@@ -30,38 +31,45 @@ public class DatabaseSeeder {
 
             System.out.println("Existing transaction and product data cleared.");
 
-            // 1. Seed Barang (Master Sembako)
-            // Format: ID, Nama, Harga, Kategori, Stok
-            insertBarang(conn, "BRG001", "Beras Pandan Wangi 5kg", 72000.0, "Bahan Pokok", 45);
-            insertBarang(conn, "BRG002", "Minyak Goreng Bimoli 2L", 36500.0, "Minyak & Lemak", 60);
-            insertBarang(conn, "BRG003", "Gula Pasir Gulaku 1kg", 16000.0, "Bahan Pokok", 80);
-            insertBarang(conn, "BRG004", "Telur Ayam Negeri 1kg", 28000.0, "Bahan Pokok", 120);
-            insertBarang(conn, "BRG005", "Tepung Terigu Segitiga Biru 1kg", 12500.0, "Bahan Pokok", 7); // Low stock
-            insertBarang(conn, "BRG006", "Kecap Manis Bango 550ml", 21000.0, "Bumbu Dapur", 30);
-            insertBarang(conn, "BRG007", "Indomie Goreng Spesial 1 Dus", 112000.0, "Bahan Pokok", 15);
-            insertBarang(conn, "BRG008", "Garam Dapur Cap Kapal 250g", 2500.0, "Bumbu Dapur", 5);  // Low stock
-            insertBarang(conn, "BRG009", "Teh Celup Sariwangi 25s", 6500.0, "Minuman", 50);
-            insertBarang(conn, "BRG010", "Sabun Mandi Lifebuoy 85g", 4000.0, "Sabun & Pembersih", 15);
-            insertBarang(conn, "BRG011", "Rinso Liquid Deterjen 750ml", 19500.0, "Sabun & Pembersih", 4); // Low stock
-            insertBarang(conn, "BRG012", "Kopi Kapal Api Spesial 165g", 14200.0, "Minuman", 25);
-            System.out.println("Seeded 12 master products (sembako).");
+            // 1. Seed Supplier
+            insertSupplier(conn, "PT Roda Mas Cemerlang", "08123456789");
+            insertSupplier(conn, "PT Bimoli Food", "08129876543");
+            insertSupplier(conn, "Bulog Divre Jabar", "08221122334");
+            insertSupplier(conn, "PT Indofood Distribusi", "08567890123");
+            System.out.println("Seeded 4 suppliers.");
 
-            // 2. Seed Barang Masuk (Restock logs)
-            // Format: ID Masuk, Tanggal, ID Barang, Qty, Supplier
-            insertBarangMasuk(conn, "BM001", "2026-06-10", "BRG001", 50, "PT Roda Mas Cemerlang");
-            insertBarangMasuk(conn, "BM002", "2026-06-11", "BRG002", 80, "PT Bimoli Food");
-            insertBarangMasuk(conn, "BM003", "2026-06-12", "BRG003", 100, "Bulog Divre Jabar");
-            insertBarangMasuk(conn, "BM004", "2026-06-13", "BRG007", 20, "PT Indofood Distribusi");
+            // 2. Seed Barang (Master Sembako)
+            // Format: ID, Nama, Harga Beli, Harga Jual, Kategori, Stok
+            insertBarang(conn, "BRG001", "Beras Pandan Wangi 5kg", 60000.0, 72000.0, "Bahan Pokok", 45);
+            insertBarang(conn, "BRG002", "Minyak Goreng Bimoli 2L", 30000.0, 36500.0, "Minyak & Lemak", 60);
+            insertBarang(conn, "BRG003", "Gula Pasir Gulaku 1kg", 13000.0, 16000.0, "Bahan Pokok", 80);
+            insertBarang(conn, "BRG004", "Telur Ayam Negeri 1kg", 23000.0, 28000.0, "Bahan Pokok", 120);
+            insertBarang(conn, "BRG005", "Tepung Terigu Segitiga Biru 1kg", 10000.0, 12500.0, "Bahan Pokok", 7); // Low stock
+            insertBarang(conn, "BRG006", "Kecap Manis Bango 550ml", 17000.0, 21000.0, "Bumbu Dapur", 30);
+            insertBarang(conn, "BRG007", "Indomie Goreng Spesial 1 Dus", 95000.0, 112000.0, "Bahan Pokok", 15);
+            insertBarang(conn, "BRG008", "Garam Dapur Cap Kapal 250g", 2000.0, 2500.0, "Bumbu Dapur", 5);  // Low stock
+            insertBarang(conn, "BRG009", "Teh Celup Sariwangi 25s", 5000.0, 6500.0, "Minuman", 50);
+            insertBarang(conn, "BRG010", "Sabun Mandi Lifebuoy 85g", 3000.0, 4000.0, "Sabun & Pembersih", 15);
+            insertBarang(conn, "BRG011", "Rinso Liquid Deterjen 750ml", 16000.0, 19500.0, "Sabun & Pembersih", 4); // Low stock
+            insertBarang(conn, "BRG012", "Kopi Kapal Api Spesial 165g", 11500.0, 14200.0, "Minuman", 25);
+            System.out.println("Seeded 12 master products (sembako) with buy/sell prices.");
+
+            // 3. Seed Barang Masuk (Restock logs)
+            // Format: ID Masuk, Tanggal, ID Barang, Qty, Supplier ID, Harga Beli
+            insertBarangMasuk(conn, "BM001", "2026-06-10", "BRG001", 50, "PT Roda Mas Cemerlang", 60000.0);
+            insertBarangMasuk(conn, "BM002", "2026-06-11", "BRG002", 80, "PT Bimoli Food", 30000.0);
+            insertBarangMasuk(conn, "BM003", "2026-06-12", "BRG003", 100, "Bulog Divre Jabar", 13000.0);
+            insertBarangMasuk(conn, "BM004", "2026-06-13", "BRG007", 20, "PT Indofood Distribusi", 95000.0);
             System.out.println("Seeded 4 incoming goods records.");
 
-            // 3. Seed Barang Keluar (Distribution logs)
-            // Format: ID Keluar, Tanggal, ID Barang, Qty, Penerima
-            insertBarangKeluar(conn, "BK001", "2026-06-14", "BRG001", 5, "Toko Kelontong Sinar");
-            insertBarangKeluar(conn, "BK002", "2026-06-14", "BRG002", 20, "Warung Nasi Bu Joko");
-            insertBarangKeluar(conn, "BK003", "2026-06-15", "BRG007", 5, "Koperasi Maju Jaya");
+            // 4. Seed Barang Keluar (Distribution logs)
+            // Format: ID Keluar, Tanggal, ID Barang, Qty, Pembeli ID, Harga Jual
+            insertBarangKeluar(conn, "BK001", "2026-06-14", "BRG001", 5, "Toko Kelontong Sinar", 72000.0);
+            insertBarangKeluar(conn, "BK002", "2026-06-14", "BRG002", 20, "Warung Nasi Bu Joko", 36500.0);
+            insertBarangKeluar(conn, "BK003", "2026-06-15", "BRG007", 5, "Koperasi Maju Jaya", 112000.0);
             System.out.println("Seeded 3 outgoing goods records.");
 
-            // 4. Seed Pengajuan Pembelian (Purchase requests)
+            // 5. Seed Pengajuan Pembelian (Purchase requests)
             // Format: ID Pengajuan, ID Barang, Tanggal, Qty, Status
             insertPengajuan(conn, "PP001", "BRG005", "2026-06-15", 30, "Pending"); // For testing owner approval
             insertPengajuan(conn, "PP002", "BRG008", "2026-06-15", 50, "Pending"); // For testing owner approval
@@ -75,38 +83,50 @@ public class DatabaseSeeder {
         }
     }
 
-    private static void insertBarang(Connection conn, String id, String nama, double harga, String kategori, int stok) throws SQLException {
-        String query = "INSERT INTO barang (id_barang, nama_barang, harga, kategori, stok) VALUES (?, ?, ?, ?, ?)";
+    private static void insertSupplier(Connection conn, String id, String noTelp) throws SQLException {
+        String query = "INSERT INTO supplier (id_supplier, nomor_telepon) VALUES (?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, id);
+            pstmt.setString(2, noTelp);
+            pstmt.executeUpdate();
+        }
+    }
+
+    private static void insertBarang(Connection conn, String id, String nama, double hargaBeli, double hargaJual, String kategori, int stok) throws SQLException {
+        String query = "INSERT INTO barang (id_barang, nama_barang, harga_beli, harga_jual, kategori, stok) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, id);
             pstmt.setString(2, nama);
-            pstmt.setDouble(3, harga);
-            pstmt.setString(4, kategori);
-            pstmt.setInt(5, stok);
+            pstmt.setDouble(3, hargaBeli);
+            pstmt.setDouble(4, hargaJual);
+            pstmt.setString(5, kategori);
+            pstmt.setInt(6, stok);
             pstmt.executeUpdate();
         }
     }
 
-    private static void insertBarangMasuk(Connection conn, String id, String tgl, String idBarang, int qty, String supplier) throws SQLException {
-        String query = "INSERT INTO barang_masuk (id_barang_masuk, tanggal_masuk, id_barang, jumlah_masuk, supplier) VALUES (?, ?, ?, ?, ?)";
+    private static void insertBarangMasuk(Connection conn, String id, String tgl, String idBarang, int qty, String supplierId, double hargaBeli) throws SQLException {
+        String query = "INSERT INTO barang_masuk (id_barang_masuk, tanggal_masuk, id_barang, jumlah_masuk, id_supplier, harga_beli) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, id);
             pstmt.setString(2, tgl);
             pstmt.setString(3, idBarang);
             pstmt.setInt(4, qty);
-            pstmt.setString(5, supplier);
+            pstmt.setString(5, supplierId);
+            pstmt.setDouble(6, hargaBeli);
             pstmt.executeUpdate();
         }
     }
 
-    private static void insertBarangKeluar(Connection conn, String id, String tgl, String idBarang, int qty, String penerima) throws SQLException {
-        String query = "INSERT INTO barang_keluar (id_barang_keluar, tanggal_keluar, id_barang, jumlah_keluar, penerima) VALUES (?, ?, ?, ?, ?)";
+    private static void insertBarangKeluar(Connection conn, String id, String tgl, String idBarang, int qty, String pembeliId, double hargaJual) throws SQLException {
+        String query = "INSERT INTO barang_keluar (id_barang_keluar, tanggal_keluar, id_barang, jumlah_keluar, id_pembeli, harga_jual) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, id);
             pstmt.setString(2, tgl);
             pstmt.setString(3, idBarang);
             pstmt.setInt(4, qty);
-            pstmt.setString(5, penerima);
+            pstmt.setString(5, pembeliId);
+            pstmt.setDouble(6, hargaJual);
             pstmt.executeUpdate();
         }
     }

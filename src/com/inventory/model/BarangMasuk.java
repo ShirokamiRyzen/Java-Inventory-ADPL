@@ -6,17 +6,19 @@ public class BarangMasuk {
     private String idBarang;
     private String namaBarang; // UI convenience
     private int jumlahMasuk;
-    private String supplier;
+    private String idSupplier;
+    private double hargaBeli;
 
     public BarangMasuk() {}
 
-    public BarangMasuk(String idBarangMasuk, String tanggalMasuk, String idBarang, String namaBarang, int jumlahMasuk, String supplier) {
+    public BarangMasuk(String idBarangMasuk, String tanggalMasuk, String idBarang, String namaBarang, int jumlahMasuk, String idSupplier, double hargaBeli) {
         this.idBarangMasuk = idBarangMasuk;
         this.tanggalMasuk = tanggalMasuk;
         this.idBarang = idBarang;
         this.namaBarang = namaBarang;
         this.jumlahMasuk = jumlahMasuk;
-        this.supplier = supplier;
+        this.idSupplier = idSupplier;
+        this.hargaBeli = hargaBeli;
     }
 
     public String getIdBarangMasuk() {
@@ -59,11 +61,28 @@ public class BarangMasuk {
         this.jumlahMasuk = jumlahMasuk;
     }
 
+    public String getIdSupplier() {
+        return idSupplier;
+    }
+
+    public void setIdSupplier(String idSupplier) {
+        this.idSupplier = idSupplier;
+    }
+
+    public double getHargaBeli() {
+        return hargaBeli;
+    }
+
+    public void setHargaBeli(double hargaBeli) {
+        this.hargaBeli = hargaBeli;
+    }
+
+    // For backwards compatibility
     public String getSupplier() {
-        return supplier;
+        return idSupplier;
     }
 
     public void setSupplier(String supplier) {
-        this.supplier = supplier;
+        this.idSupplier = supplier;
     }
 }

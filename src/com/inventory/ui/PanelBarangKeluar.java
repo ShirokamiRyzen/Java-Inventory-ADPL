@@ -69,7 +69,7 @@ public class PanelBarangKeluar extends JPanel {
         centerPanel.setOpaque(false);
         centerPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        String[] columns = {"ID Keluar", "Tanggal", "Kode Barang", "Nama Barang", "Jumlah Keluar", "Penerima"};
+        String[] columns = {"ID Keluar", "Tanggal", "Kode Barang", "Nama Barang", "Jumlah Keluar", "Pembeli", "Harga Jual"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -108,7 +108,8 @@ public class PanelBarangKeluar extends JPanel {
                             bk.getIdBarang(),
                             bk.getNamaBarang(),
                             bk.getJumlahKeluar(),
-                            bk.getPenerima()
+                            bk.getIdPembeli(),
+                            String.format("Rp %,.0f", bk.getHargaJual())
                         });
                     }
                 } catch (Exception e) {
@@ -127,7 +128,7 @@ public class PanelBarangKeluar extends JPanel {
         }
 
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Input Barang Keluar Baru", true);
-        dialog.setSize(450, 360); // slightly wider to avoid any label cutoffs
+        dialog.setSize(450, 420); // slightly taller to fit everything comfortably
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
 
@@ -167,12 +168,34 @@ public class PanelBarangKeluar extends JPanel {
         txtJumlah.setForeground(Theme.FG_LIGHT);
         txtJumlah.setCaretColor(Theme.FG_LIGHT);
 
-        JLabel lblPenerima = new JLabel("Penerima / Tujuan");
-        lblPenerima.setForeground(Theme.FG_LIGHT);
-        JTextField txtPenerima = new JTextField();
-        txtPenerima.setBackground(Theme.BG_DARK);
-        txtPenerima.setForeground(Theme.FG_LIGHT);
-        txtPenerima.setCaretColor(Theme.FG_LIGHT);
+        JLabel lblHargaJual = new JLabel("Harga Jual (Rp)");
+        lblHargaJual.setForeground(Theme.FG_LIGHT);
+        JTextField txtHargaJual = new JTextField();
+        txtHargaJual.setBackground(Theme.BG_DARK);
+        txtHargaJual.setForeground(Theme.FG_LIGHT);
+        txtHargaJual.setCaretColor(Theme.FG_LIGHT);
+
+        JLabel lblPembeli = new JLabel("Pembeli");
+        lblPembeli.setForeground(Theme.FG_LIGHT);
+        JTextField txtPembeli = new JTextField();
+        txtPembeli.setBackground(Theme.BG_DARK);
+        txtPembeli.setForeground(Theme.FG_LIGHT);
+        txtPembeli.setCaretColor(Theme.FG_LIGHT);
+
+        // Auto-fill price based on chosen product
+        cbBarang.addActionListener(e -> {
+            int idx = cbBarang.getSelectedIndex();
+            if (idx >= 0) {
+                Barang selected = items.get(idx);
+                txtHargaJual.setText(String.format("%.0f", selected.getHargaJual()));
+            }
+        });
+
+        // Trigger action once to initialize first item price
+        if (cbBarang.getSelectedIndex() >= 0) {
+            Barang selected = items.get(cbBarang.getSelectedIndex());
+            txtHargaJual.setText(String.format("%.0f", selected.getHargaJual()));
+        }
 
         // Layout adding (explicit column weights so labels don't get truncated)
         gbc.weightx = 0.0;
@@ -196,9 +219,14 @@ public class PanelBarangKeluar extends JPanel {
         gbc.gridx = 1; content.add(txtJumlah, gbc);
 
         gbc.weightx = 0.0;
-        gbc.gridx = 0; gbc.gridy = 4; content.add(lblPenerima, gbc);
+        gbc.gridx = 0; gbc.gridy = 4; content.add(lblHargaJual, gbc);
         gbc.weightx = 1.0;
-        gbc.gridx = 1; content.add(txtPenerima, gbc);
+        gbc.gridx = 1; content.add(txtHargaJual, gbc);
+
+        gbc.weightx = 0.0;
+        gbc.gridx = 0; gbc.gridy = 5; content.add(lblPembeli, gbc);
+        gbc.weightx = 1.0;
+        gbc.gridx = 1; content.add(txtPembeli, gbc);
 
         // Buttons
         JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -210,7 +238,7 @@ public class PanelBarangKeluar extends JPanel {
         buttonRow.add(btnCancel);
         buttonRow.add(btnSave);
 
-        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
         gbc.insets = new Insets(15, 8, 8, 8);
         content.add(buttonRow, gbc);
 
@@ -221,31 +249,34 @@ public class PanelBarangKeluar extends JPanel {
             String tanggal = sdfFormat.format(dpTanggal.getSelectedDate());
             int selectedIdx = cbBarang.getSelectedIndex();
             String jumlahStr = txtJumlah.getText().trim();
-            String penerima = txtPenerima.getText().trim();
+            String hargaJualStr = txtHargaJual.getText().trim();
+            String pembeli = txtPembeli.getText().trim();
 
-            if (tanggal.isEmpty() || jumlahStr.isEmpty() || penerima.isEmpty()) {
+            if (tanggal.isEmpty() || jumlahStr.isEmpty() || hargaJualStr.isEmpty() || pembeli.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Semua field wajib diisi!", "Validasi Gagal", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             int jumlah;
+            double hargaJual;
             try {
                 jumlah = Integer.parseInt(jumlahStr);
-                if (jumlah <= 0) throw new NumberFormatException();
+                hargaJual = Double.parseDouble(hargaJualStr);
+                if (jumlah <= 0 || hargaJual < 0) throw new NumberFormatException();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog, "Jumlah keluar harus berupa angka positif!", "Validasi Gagal", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, "Jumlah keluar dan Harga jual harus berupa angka positif!", "Validasi Gagal", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             Barang selectedBarang = items.get(selectedIdx);
             
-            // Check stock before submitting database call (optional safety layer, DAO will do it transactionally too)
+            // Check stock before submitting database call
             if (selectedBarang.getStok() < jumlah) {
                 JOptionPane.showMessageDialog(dialog, "Stok tidak mencukupi!\nStok saat ini: " + selectedBarang.getStok() + "\nJumlah diminta: " + jumlah, "Validasi Gagal", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             
-            BarangKeluar bk = new BarangKeluar(idKeluar, tanggal, selectedBarang.getIdBarang(), selectedBarang.getNamaBarang(), jumlah, penerima);
+            BarangKeluar bk = new BarangKeluar(idKeluar, tanggal, selectedBarang.getIdBarang(), selectedBarang.getNamaBarang(), jumlah, pembeli, hargaJual);
             
             if (keluarDAO.insertBarangKeluar(bk)) {
                 JOptionPane.showMessageDialog(dialog, "Data barang keluar berhasil dicatat, stok berkurang!");

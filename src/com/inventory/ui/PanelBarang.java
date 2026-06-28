@@ -113,7 +113,7 @@ public class PanelBarang extends JPanel {
         centerPanel.add(searchBarPanel, BorderLayout.NORTH);
 
         // Table setup
-        String[] columns = {"Kode Barang", "Nama Barang", "Kategori", "Harga", "Stok"};
+        String[] columns = {"Kode Barang", "Nama Barang", "Kategori", "Harga Beli", "Harga Jual", "Stok"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -206,7 +206,8 @@ public class PanelBarang extends JPanel {
                 b.getIdBarang(),
                 b.getNamaBarang(),
                 b.getKategori(),
-                String.format("Rp %,.0f", b.getHarga()),
+                String.format("Rp %,.0f", b.getHargaBeli()),
+                String.format("Rp %,.0f", b.getHargaJual()),
                 b.getStok()
             });
         }
@@ -216,7 +217,7 @@ public class PanelBarang extends JPanel {
         boolean isEdit = (barang != null);
         String title = isEdit ? (currentUser.getRole().equals("Pemilik") ? "Sesuaikan Harga Barang" : "Ubah Data Barang") : "Tambah Barang Baru";
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), title, true);
-        dialog.setSize(400, 380);
+        dialog.setSize(400, 420);
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
 
@@ -267,14 +268,24 @@ public class PanelBarang extends JPanel {
             }
         }
 
-        JLabel lblHarga = new JLabel("Harga (Rp)");
-        lblHarga.setForeground(Theme.FG_LIGHT);
-        JTextField txtHarga = new JTextField();
-        txtHarga.setBackground(Theme.BG_DARK);
-        txtHarga.setForeground(Theme.FG_LIGHT);
-        txtHarga.setCaretColor(Theme.FG_LIGHT);
+        JLabel lblHargaBeli = new JLabel("Harga Beli (Rp)");
+        lblHargaBeli.setForeground(Theme.FG_LIGHT);
+        JTextField txtHargaBeli = new JTextField();
+        txtHargaBeli.setBackground(Theme.BG_DARK);
+        txtHargaBeli.setForeground(Theme.FG_LIGHT);
+        txtHargaBeli.setCaretColor(Theme.FG_LIGHT);
         if (isEdit) {
-            txtHarga.setText(String.format("%.0f", barang.getHarga()));
+            txtHargaBeli.setText(String.format("%.0f", barang.getHargaBeli()));
+        }
+
+        JLabel lblHargaJual = new JLabel("Harga Jual (Rp)");
+        lblHargaJual.setForeground(Theme.FG_LIGHT);
+        JTextField txtHargaJual = new JTextField();
+        txtHargaJual.setBackground(Theme.BG_DARK);
+        txtHargaJual.setForeground(Theme.FG_LIGHT);
+        txtHargaJual.setCaretColor(Theme.FG_LIGHT);
+        if (isEdit) {
+            txtHargaJual.setText(String.format("%.0f", barang.getHargaJual()));
         }
 
         JLabel lblStok = new JLabel("Stok Awal");
@@ -298,10 +309,13 @@ public class PanelBarang extends JPanel {
         gbc.gridx = 0; gbc.gridy = 2; content.add(lblKategori, gbc);
         gbc.gridx = 1; content.add(cbKategori, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; content.add(lblHarga, gbc);
-        gbc.gridx = 1; content.add(txtHarga, gbc);
+        gbc.gridx = 0; gbc.gridy = 3; content.add(lblHargaBeli, gbc);
+        gbc.gridx = 1; content.add(txtHargaBeli, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4; content.add(lblStok, gbc);
+        gbc.gridx = 0; gbc.gridy = 4; content.add(lblHargaJual, gbc);
+        gbc.gridx = 1; content.add(txtHargaJual, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 5; content.add(lblStok, gbc);
         gbc.gridx = 1; content.add(txtStok, gbc);
 
         // Buttons
@@ -315,7 +329,7 @@ public class PanelBarang extends JPanel {
         buttonRow.add(btnCancel);
         buttonRow.add(btnSave);
 
-        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
         gbc.insets = new Insets(15, 8, 8, 8);
         content.add(buttonRow, gbc);
 
@@ -324,20 +338,22 @@ public class PanelBarang extends JPanel {
             // Validation
             String nama = txtNama.getText().trim();
             String kategori = (String) cbKategori.getSelectedItem();
-            String hargaStr = txtHarga.getText().trim();
+            String hargaBeliStr = txtHargaBeli.getText().trim();
+            String hargaJualStr = txtHargaJual.getText().trim();
             String stokStr = txtStok.getText().trim();
 
-            if (nama.isEmpty() || hargaStr.isEmpty()) {
+            if (nama.isEmpty() || hargaBeliStr.isEmpty() || hargaJualStr.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Semua field harus diisi!", "Validasi Gagal", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            double harga;
+            double hargaBeli, hargaJual;
             int stok;
             try {
-                harga = Double.parseDouble(hargaStr);
+                hargaBeli = Double.parseDouble(hargaBeliStr);
+                hargaJual = Double.parseDouble(hargaJualStr);
                 stok = Integer.parseInt(stokStr);
-                if (harga < 0 || stok < 0) {
+                if (hargaBeli < 0 || hargaJual < 0 || stok < 0) {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException ex) {
@@ -345,7 +361,7 @@ public class PanelBarang extends JPanel {
                 return;
             }
 
-            Barang b = new Barang(txtId.getText(), nama, harga, kategori, stok);
+            Barang b = new Barang(txtId.getText(), nama, hargaBeli, hargaJual, kategori, stok);
             boolean success;
             if (isEdit) {
                 success = barangDAO.updateBarang(b);

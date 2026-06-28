@@ -66,6 +66,7 @@ public class DatabaseCli {
         try (Connection conn = DatabaseHelper.getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute("SET FOREIGN_KEY_CHECKS = 0;");
+            stmt.execute("DELETE FROM supplier;");
             stmt.execute("DELETE FROM barang;");
             stmt.execute("DELETE FROM barang_masuk;");
             stmt.execute("DELETE FROM barang_keluar;");

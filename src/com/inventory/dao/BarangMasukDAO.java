@@ -25,7 +25,8 @@ public class BarangMasukDAO {
                     rs.getString("id_barang"),
                     rs.getString("nama_barang"),
                     rs.getInt("jumlah_masuk"),
-                    rs.getString("supplier")
+                    rs.getString("id_supplier"),
+                    rs.getDouble("harga_beli")
                 ));
             }
         } catch (SQLException e) {
@@ -35,7 +36,7 @@ public class BarangMasukDAO {
     }
 
     public boolean insertBarangMasuk(BarangMasuk bm) {
-        String queryInsert = "INSERT INTO barang_masuk (id_barang_masuk, tanggal_masuk, id_barang, jumlah_masuk, supplier) VALUES (?, ?, ?, ?, ?)";
+        String queryInsert = "INSERT INTO barang_masuk (id_barang_masuk, tanggal_masuk, id_barang, jumlah_masuk, id_supplier, harga_beli) VALUES (?, ?, ?, ?, ?, ?)";
         String queryUpdateStock = "UPDATE barang SET stok = stok + ? WHERE id_barang = ?";
         
         Connection conn = null;
@@ -49,7 +50,8 @@ public class BarangMasukDAO {
                 pstmtInsert.setString(2, bm.getTanggalMasuk());
                 pstmtInsert.setString(3, bm.getIdBarang());
                 pstmtInsert.setInt(4, bm.getJumlahMasuk());
-                pstmtInsert.setString(5, bm.getSupplier());
+                pstmtInsert.setString(5, bm.getIdSupplier());
+                pstmtInsert.setDouble(6, bm.getHargaBeli());
                 pstmtInsert.executeUpdate();
             }
             

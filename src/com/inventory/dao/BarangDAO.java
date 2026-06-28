@@ -20,7 +20,8 @@ public class BarangDAO {
                 list.add(new Barang(
                     rs.getString("id_barang"),
                     rs.getString("nama_barang"),
-                    rs.getDouble("harga"),
+                    rs.getDouble("harga_beli"),
+                    rs.getDouble("harga_jual"),
                     rs.getString("kategori"),
                     rs.getInt("stok")
                 ));
@@ -42,7 +43,8 @@ public class BarangDAO {
                     return new Barang(
                         rs.getString("id_barang"),
                         rs.getString("nama_barang"),
-                        rs.getDouble("harga"),
+                        rs.getDouble("harga_beli"),
+                        rs.getDouble("harga_jual"),
                         rs.getString("kategori"),
                         rs.getInt("stok")
                     );
@@ -55,15 +57,16 @@ public class BarangDAO {
     }
 
     public boolean insertBarang(Barang barang) {
-        String query = "INSERT INTO barang (id_barang, nama_barang, harga, kategori, stok) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO barang (id_barang, nama_barang, harga_beli, harga_jual, kategori, stok) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             
             pstmt.setString(1, barang.getIdBarang());
             pstmt.setString(2, barang.getNamaBarang());
-            pstmt.setDouble(3, barang.getHarga());
-            pstmt.setString(4, barang.getKategori());
-            pstmt.setInt(5, barang.getStok());
+            pstmt.setDouble(3, barang.getHargaBeli());
+            pstmt.setDouble(4, barang.getHargaJual());
+            pstmt.setString(5, barang.getKategori());
+            pstmt.setInt(6, barang.getStok());
             
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -73,15 +76,16 @@ public class BarangDAO {
     }
 
     public boolean updateBarang(Barang barang) {
-        String query = "UPDATE barang SET nama_barang = ?, harga = ?, kategori = ?, stok = ? WHERE id_barang = ?";
+        String query = "UPDATE barang SET nama_barang = ?, harga_beli = ?, harga_jual = ?, kategori = ?, stok = ? WHERE id_barang = ?";
         try (Connection conn = DatabaseHelper.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             
             pstmt.setString(1, barang.getNamaBarang());
-            pstmt.setDouble(2, barang.getHarga());
-            pstmt.setString(3, barang.getKategori());
-            pstmt.setInt(4, barang.getStok());
-            pstmt.setString(5, barang.getIdBarang());
+            pstmt.setDouble(2, barang.getHargaBeli());
+            pstmt.setDouble(3, barang.getHargaJual());
+            pstmt.setString(4, barang.getKategori());
+            pstmt.setInt(5, barang.getStok());
+            pstmt.setString(6, barang.getIdBarang());
             
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {

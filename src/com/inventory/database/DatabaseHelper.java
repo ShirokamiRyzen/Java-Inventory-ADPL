@@ -98,36 +98,46 @@ public class DatabaseHelper {
                     "nama_user VARCHAR(100) NOT NULL" +
                     ");");
 
-            // 2. Create Barang table
+            // 2. Create Supplier table
+            stmt.execute("CREATE TABLE IF NOT EXISTS supplier (" +
+                    "id_supplier VARCHAR(50) PRIMARY KEY," +
+                    "nomor_telepon VARCHAR(50) NOT NULL" +
+                    ");");
+
+            // 3. Create Barang table
             stmt.execute("CREATE TABLE IF NOT EXISTS barang (" +
                     "id_barang VARCHAR(50) PRIMARY KEY," +
                     "nama_barang VARCHAR(100) NOT NULL," +
-                    "harga DOUBLE NOT NULL CHECK(harga >= 0)," +
+                    "harga_beli DOUBLE NOT NULL CHECK(harga_beli >= 0)," +
+                    "harga_jual DOUBLE NOT NULL CHECK(harga_jual >= 0)," +
                     "kategori VARCHAR(50) NOT NULL," +
                     "stok INT NOT NULL DEFAULT 0 CHECK(stok >= 0)" +
                     ");");
 
-            // 3. Create Barang Masuk table
+            // 4. Create Barang Masuk table
             stmt.execute("CREATE TABLE IF NOT EXISTS barang_masuk (" +
                     "id_barang_masuk VARCHAR(50) PRIMARY KEY," +
                     "tanggal_masuk VARCHAR(50) NOT NULL," +
                     "id_barang VARCHAR(50) NOT NULL," +
                     "jumlah_masuk INT NOT NULL CHECK(jumlah_masuk > 0)," +
-                    "supplier VARCHAR(100) NOT NULL," +
-                    "FOREIGN KEY (id_barang) REFERENCES barang(id_barang) ON DELETE CASCADE" +
+                    "id_supplier VARCHAR(50) NOT NULL," +
+                    "harga_beli DOUBLE NOT NULL CHECK(harga_beli >= 0)," +
+                    "FOREIGN KEY (id_barang) REFERENCES barang(id_barang) ON DELETE CASCADE," +
+                    "FOREIGN KEY (id_supplier) REFERENCES supplier(id_supplier) ON DELETE CASCADE" +
                     ");");
 
-            // 4. Create Barang Keluar table
+            // 5. Create Barang Keluar table
             stmt.execute("CREATE TABLE IF NOT EXISTS barang_keluar (" +
                     "id_barang_keluar VARCHAR(50) PRIMARY KEY," +
                     "tanggal_keluar VARCHAR(50) NOT NULL," +
                     "id_barang VARCHAR(50) NOT NULL," +
                     "jumlah_keluar INT NOT NULL CHECK(jumlah_keluar > 0)," +
-                    "penerima VARCHAR(100) NOT NULL," +
+                    "id_pembeli VARCHAR(100) NOT NULL," +
+                    "harga_jual DOUBLE NOT NULL CHECK(harga_jual >= 0)," +
                     "FOREIGN KEY (id_barang) REFERENCES barang(id_barang) ON DELETE CASCADE" +
                     ");");
 
-            // 5. Create Pengajuan Pembelian table
+            // 6. Create Pengajuan Pembelian table
             stmt.execute("CREATE TABLE IF NOT EXISTS pengajuan_pembelian (" +
                     "id_pengajuan VARCHAR(50) PRIMARY KEY," +
                     "id_barang VARCHAR(50) NOT NULL," +
@@ -137,7 +147,7 @@ public class DatabaseHelper {
                     "FOREIGN KEY (id_barang) REFERENCES barang(id_barang) ON DELETE CASCADE" +
                     ");");
 
-            // 6. Create Laporan table
+            // 7. Create Laporan table
             stmt.execute("CREATE TABLE IF NOT EXISTS laporan (" +
                     "id_laporan VARCHAR(50) PRIMARY KEY," +
                     "tanggal_laporan VARCHAR(50) NOT NULL," +

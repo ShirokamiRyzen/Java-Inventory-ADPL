@@ -279,31 +279,31 @@ public class PanelLaporan extends JPanel {
                     sb.append("Tipe Laporan  : Laporan Stok Barang Aktual\n");
                     sb.append("Periode       : ").append(start).append(" s/d ").append(end).append("\n");
                     sb.append("====================================================\n\n");
-                    sb.append(String.format("%-10s %-22s %-12s %-6s\n", "KODE", "NAMA BARANG", "KATEGORI", "STOK"));
-                    sb.append("----------------------------------------------------\n");
+                    sb.append(String.format("%-10s %-20s %-12s %-6s %-10s %-10s\n", "KODE", "NAMA BARANG", "KATEGORI", "STOK", "HRG BELI", "HRG JUAL"));
+                    sb.append("----------------------------------------------------------------------\n");
                     
                     List<Barang> items = barangDAO.getAllBarang();
                     double totalNilai = 0;
                     int totalUnit = 0;
                     for (Barang b : items) {
                         String name = b.getNamaBarang();
-                        if (name.length() > 20) name = name.substring(0, 18) + "..";
-                        sb.append(String.format("%-10s %-22s %-12s %-6d\n", 
-                            b.getIdBarang(), name, b.getKategori(), b.getStok()));
-                        totalNilai += (b.getHarga() * b.getStok());
+                        if (name.length() > 18) name = name.substring(0, 16) + "..";
+                        sb.append(String.format("%-10s %-20s %-12s %-6d %-10.0f %-10.0f\n", 
+                            b.getIdBarang(), name, b.getKategori(), b.getStok(), b.getHargaBeli(), b.getHargaJual()));
+                        totalNilai += (b.getHargaBeli() * b.getStok());
                         totalUnit += b.getStok();
                     }
-                    sb.append("----------------------------------------------------\n");
+                    sb.append("----------------------------------------------------------------------\n");
                     sb.append("Total Jenis Barang  : ").append(items.size()).append(" jenis\n");
                     sb.append("Total Jumlah Stok   : ").append(totalUnit).append(" unit\n");
-                    sb.append("Estimasi Nilai Aset : ").append(String.format("Rp %,.0f", totalNilai)).append("\n");
+                    sb.append("Estimasi Nilai Aset : ").append(String.format("Rp %,.0f", totalNilai)).append(" (Berdasarkan Harga Beli)\n");
                     
                 } else if (selectedType == 1) { // Barang Masuk
                     sb.append("Tipe Laporan  : Transaksi Barang Masuk (Restock)\n");
                     sb.append("Periode       : ").append(start).append(" s/d ").append(end).append("\n");
                     sb.append("====================================================\n\n");
-                    sb.append(String.format("%-8s %-10s %-20s %-5s %-10s\n", "ID", "TANGGAL", "BARANG", "QTY", "SUPPLIER"));
-                    sb.append("----------------------------------------------------\n");
+                    sb.append(String.format("%-8s %-10s %-18s %-5s %-12s %-10s\n", "ID", "TANGGAL", "BARANG", "QTY", "SUPPLIER", "HRG BELI"));
+                    sb.append("----------------------------------------------------------------------\n");
                     
                     List<BarangMasuk> items = masukDAO.getAllBarangMasuk();
                     // Filter list by date range period
@@ -314,16 +314,16 @@ public class PanelLaporan extends JPanel {
                     int totalMasuk = 0;
                     for (BarangMasuk bm : items) {
                         String name = bm.getNamaBarang();
-                        if (name.length() > 18) name = name.substring(0, 16) + "..";
+                        if (name.length() > 16) name = name.substring(0, 14) + "..";
                         
                         String supplier = bm.getSupplier();
                         if (supplier.length() > 10) supplier = supplier.substring(0, 8) + "..";
-
-                        sb.append(String.format("%-8s %-10s %-20s %-5d %-10s\n", 
-                            bm.getIdBarangMasuk(), bm.getTanggalMasuk(), name, bm.getJumlahMasuk(), supplier));
+ 
+                        sb.append(String.format("%-8s %-10s %-18s %-5d %-12s %-10.0f\n", 
+                            bm.getIdBarangMasuk(), bm.getTanggalMasuk(), name, bm.getJumlahMasuk(), supplier, bm.getHargaBeli()));
                         totalMasuk += bm.getJumlahMasuk();
                     }
-                    sb.append("----------------------------------------------------\n");
+                    sb.append("----------------------------------------------------------------------\n");
                     sb.append("Total Transaksi Masuk : ").append(items.size()).append(" kali\n");
                     sb.append("Total Unit Masuk      : ").append(totalMasuk).append(" unit\n");
                     
@@ -331,28 +331,28 @@ public class PanelLaporan extends JPanel {
                     sb.append("Tipe Laporan  : Transaksi Barang Keluar (Distribusi)\n");
                     sb.append("Periode       : ").append(start).append(" s/d ").append(end).append("\n");
                     sb.append("====================================================\n\n");
-                    sb.append(String.format("%-8s %-10s %-20s %-5s %-10s\n", "ID", "TANGGAL", "BARANG", "QTY", "PENERIMA"));
-                    sb.append("----------------------------------------------------\n");
+                    sb.append(String.format("%-8s %-10s %-18s %-5s %-12s %-10s\n", "ID", "TANGGAL", "BARANG", "QTY", "PEMBELI", "HRG JUAL"));
+                    sb.append("----------------------------------------------------------------------\n");
                     
                     List<BarangKeluar> items = keluarDAO.getAllBarangKeluar();
                     // Filter list by date range period
                     items = items.stream()
                         .filter(bk -> bk.getTanggalKeluar().compareTo(start) >= 0 && bk.getTanggalKeluar().compareTo(end) <= 0)
                         .collect(java.util.stream.Collectors.toList());
-
+ 
                     int totalKeluar = 0;
                     for (BarangKeluar bk : items) {
                         String name = bk.getNamaBarang();
-                        if (name.length() > 18) name = name.substring(0, 16) + "..";
+                        if (name.length() > 16) name = name.substring(0, 14) + "..";
                         
                         String penerima = bk.getPenerima();
                         if (penerima.length() > 10) penerima = penerima.substring(0, 8) + "..";
-
-                        sb.append(String.format("%-8s %-10s %-20s %-5d %-10s\n", 
-                            bk.getIdBarangKeluar(), bk.getTanggalKeluar(), name, bk.getJumlahKeluar(), penerima));
+ 
+                        sb.append(String.format("%-8s %-10s %-18s %-5d %-12s %-10.0f\n", 
+                            bk.getIdBarangKeluar(), bk.getTanggalKeluar(), name, bk.getJumlahKeluar(), penerima, bk.getHargaJual()));
                         totalKeluar += bk.getJumlahKeluar();
                     }
-                    sb.append("----------------------------------------------------\n");
+                    sb.append("----------------------------------------------------------------------\n");
                     sb.append("Total Transaksi Keluar : ").append(items.size()).append(" kali\n");
                     sb.append("Total Unit Keluar      : ").append(totalKeluar).append(" unit\n");
                 }
@@ -441,32 +441,32 @@ public class PanelLaporan extends JPanel {
                 // Write UTF-8 BOM for Excel compatibility
                 pw.write('\ufeff');
 
-                if (selectedType == 0) {
-                    pw.println("KODE BARANG;NAMA BARANG;KATEGORI;STOK;HARGA;NILAI ASET");
+                 if (selectedType == 0) {
+                    pw.println("KODE BARANG;NAMA BARANG;KATEGORI;STOK;HARGA BELI;HARGA JUAL;NILAI ASET (COST)");
                     List<Barang> items = barangDAO.getAllBarang();
                     for (Barang b : items) {
-                        pw.println(String.format("%s;%s;%s;%d;%.2f;%.2f",
-                            b.getIdBarang(), b.getNamaBarang(), b.getKategori(), b.getStok(), b.getHarga(), (b.getHarga() * b.getStok())));
+                        pw.println(String.format("%s;%s;%s;%d;%.2f;%.2f;%.2f",
+                            b.getIdBarang(), b.getNamaBarang(), b.getKategori(), b.getStok(), b.getHargaBeli(), b.getHargaJual(), (b.getHargaBeli() * b.getStok())));
                     }
                 } else if (selectedType == 1) {
-                    pw.println("ID MASUK;TANGGAL MASUK;KODE BARANG;NAMA BARANG;JUMLAH MASUK;SUPPLIER");
+                    pw.println("ID MASUK;TANGGAL MASUK;KODE BARANG;NAMA BARANG;JUMLAH MASUK;SUPPLIER;HARGA BELI;TOTAL");
                     List<BarangMasuk> items = masukDAO.getAllBarangMasuk();
                     items = items.stream()
                         .filter(bm -> bm.getTanggalMasuk().compareTo(start) >= 0 && bm.getTanggalMasuk().compareTo(end) <= 0)
                         .collect(java.util.stream.Collectors.toList());
                     for (BarangMasuk bm : items) {
-                        pw.println(String.format("%s;%s;%s;%s;%d;%s",
-                            bm.getIdBarangMasuk(), bm.getTanggalMasuk(), bm.getIdBarang(), bm.getNamaBarang(), bm.getJumlahMasuk(), bm.getSupplier()));
+                        pw.println(String.format("%s;%s;%s;%s;%d;%s;%.2f;%.2f",
+                            bm.getIdBarangMasuk(), bm.getTanggalMasuk(), bm.getIdBarang(), bm.getNamaBarang(), bm.getJumlahMasuk(), bm.getSupplier(), bm.getHargaBeli(), (bm.getHargaBeli() * bm.getJumlahMasuk())));
                     }
                 } else {
-                    pw.println("ID KELUAR;TANGGAL KELUAR;KODE BARANG;NAMA BARANG;JUMLAH KELUAR;PENERIMA");
+                    pw.println("ID KELUAR;TANGGAL KELUAR;KODE BARANG;NAMA BARANG;JUMLAH KELUAR;PEMBELI;HARGA JUAL;TOTAL");
                     List<BarangKeluar> items = keluarDAO.getAllBarangKeluar();
                     items = items.stream()
                         .filter(bk -> bk.getTanggalKeluar().compareTo(start) >= 0 && bk.getTanggalKeluar().compareTo(end) <= 0)
                         .collect(java.util.stream.Collectors.toList());
                     for (BarangKeluar bk : items) {
-                        pw.println(String.format("%s;%s;%s;%s;%d;%s",
-                            bk.getIdBarangKeluar(), bk.getTanggalKeluar(), bk.getIdBarang(), bk.getNamaBarang(), bk.getJumlahKeluar(), bk.getPenerima()));
+                        pw.println(String.format("%s;%s;%s;%s;%d;%s;%.2f;%.2f",
+                            bk.getIdBarangKeluar(), bk.getTanggalKeluar(), bk.getIdBarang(), bk.getNamaBarang(), bk.getJumlahKeluar(), bk.getPenerima(), bk.getHargaJual(), (bk.getHargaJual() * bk.getJumlahKeluar())));
                     }
                 }
                 

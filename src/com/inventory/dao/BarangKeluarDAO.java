@@ -25,7 +25,8 @@ public class BarangKeluarDAO {
                     rs.getString("id_barang"),
                     rs.getString("nama_barang"),
                     rs.getInt("jumlah_keluar"),
-                    rs.getString("penerima")
+                    rs.getString("id_pembeli"),
+                    rs.getDouble("harga_jual")
                 ));
             }
         } catch (SQLException e) {
@@ -36,7 +37,7 @@ public class BarangKeluarDAO {
 
     public boolean insertBarangKeluar(BarangKeluar bk) {
         String queryCheckStock = "SELECT stok FROM barang WHERE id_barang = ?";
-        String queryInsert = "INSERT INTO barang_keluar (id_barang_keluar, tanggal_keluar, id_barang, jumlah_keluar, penerima) VALUES (?, ?, ?, ?, ?)";
+        String queryInsert = "INSERT INTO barang_keluar (id_barang_keluar, tanggal_keluar, id_barang, jumlah_keluar, id_pembeli, harga_jual) VALUES (?, ?, ?, ?, ?, ?)";
         String queryUpdateStock = "UPDATE barang SET stok = stok - ? WHERE id_barang = ?";
         
         Connection conn = null;
@@ -67,7 +68,8 @@ public class BarangKeluarDAO {
                 pstmtInsert.setString(2, bk.getTanggalKeluar());
                 pstmtInsert.setString(3, bk.getIdBarang());
                 pstmtInsert.setInt(4, bk.getJumlahKeluar());
-                pstmtInsert.setString(5, bk.getPenerima());
+                pstmtInsert.setString(5, bk.getIdPembeli());
+                pstmtInsert.setDouble(6, bk.getHargaJual());
                 pstmtInsert.executeUpdate();
             }
             

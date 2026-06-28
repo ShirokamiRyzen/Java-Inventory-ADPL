@@ -91,6 +91,10 @@ public class MainFrame extends JFrame {
         viewPanels.put("Master Barang", panelBarang);
         contentPanel.add(panelBarang, "Master Barang");
 
+        PanelSupplier panelSupplier = new PanelSupplier(currentUser);
+        viewPanels.put("Master Supplier", panelSupplier);
+        contentPanel.add(panelSupplier, "Master Supplier");
+
         PanelBarangMasuk panelMasuk = new PanelBarangMasuk(currentUser);
         viewPanels.put("Barang Masuk", panelMasuk);
         contentPanel.add(panelMasuk, "Barang Masuk");
@@ -110,6 +114,7 @@ public class MainFrame extends JFrame {
         // Menu creation filtered by authorization
         addMenuItem(menuPanel, "Dashboard", "dashboard");
         addMenuItem(menuPanel, "Master Barang", "barang");
+        addMenuItem(menuPanel, "Master Supplier", "supplier");
         addMenuItem(menuPanel, "Barang Masuk", "masuk");
         addMenuItem(menuPanel, "Barang Keluar", "keluar");
         addMenuItem(menuPanel, "Pengajuan", "pengajuan");
@@ -256,6 +261,8 @@ public class MainFrame extends JFrame {
         // Clear table selections when switching pages to prevent stale selection states
         if (targetPanel instanceof PanelBarang) {
             ((PanelBarang) targetPanel).clearTableSelection();
+        } else if (targetPanel instanceof PanelSupplier) {
+            ((PanelSupplier) targetPanel).clearTableSelection();
         } else if (targetPanel instanceof PanelBarangMasuk) {
             ((PanelBarangMasuk) targetPanel).clearTableSelection();
         } else if (targetPanel instanceof PanelBarangKeluar) {
@@ -385,6 +392,18 @@ public class MainFrame extends JFrame {
                 // Draw user icon (head and shoulder outline)
                 g2.drawOval(x + 5, y + 1, 6, 6);
                 g2.drawArc(x + 1, y + 9, 14, 10, 0, 180);
+            } else if ("supplier".equals(type)) {
+                // Draw a beautiful geometric stylized warehouse/factory icon
+                g2.drawRect(x + 1, y + 5, 13, 9);
+                // Roof spikes
+                g2.drawLine(x + 1, y + 5, x + 4, y + 2);
+                g2.drawLine(x + 4, y + 2, x + 4, y + 5);
+                g2.drawLine(x + 4, y + 5, x + 7, y + 2);
+                g2.drawLine(x + 7, y + 2, x + 7, y + 5);
+                g2.drawLine(x + 7, y + 5, x + 10, y + 2);
+                g2.drawLine(x + 10, y + 2, x + 10, y + 5);
+                g2.drawLine(x + 10, y + 5, x + 13, y + 2);
+                g2.drawLine(x + 13, y + 2, x + 14, y + 5);
             }
 
             g2.dispose();
